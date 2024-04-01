@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Packet Analysis</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 10px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .button-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    .file-input {
+      border: 1px solid #ccc;
+      display: inline-block;
+      padding: 6px 12px;
+      cursor: pointer;
+      background-color: #f8f8f8;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+    .file-input:hover {
+      background-color: #e8e8e8;
+    }
+    input[type="submit"] {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .row p {
+      flex-basis: 48%;
+      margin: 0;
+    }
+    .prediction {
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+      color: white;
+      border-radius: 5px;
+    }
+    .Attack {
+      background-color: red;
+    }
+    .Normal {
+      background-color: green;
+    }
+    .filename {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload CSV File for Packet Analysis</h1>
+
+    <div class="filename" id="filename"></div>
+    <div class="button-row">
+    <form action="/" method="post" enctype="multipart/form-data">
+        <label class="file-input">
+            Choose File
+            <input type="file" name="file" id="file" style="display: none;" onchange="updateFilename()">
+          </label>
+      <input type="submit" value="Upload">
+    </form>
+
+    {% if packets %}
+      <form action="/predict" method="post">
+        <input type="submit" value="Predict">
+      </form>
+    </div>
+    
+
+      {% for packet in packets %}
+        <div class="card">
+          <div class="row">
+            <p><strong>Protocol:</strong> {{ packet['proto'] }}</p>
+            <p><strong>State:</strong> {{ packet['state'] }}</p>
+          </div>
+          <div class="row">
+            <p><strong>Service:</strong> {{ packet['service'] }}</p>
+            <p><strong>Duration:</strong> {{ packet['dur'] }}</p>
+          </div>
+          <div class="row">
+            <p><strong>Source Bytes:</strong> {{ packet['sbytes'] }}</p>
+            <p><strong>Destination Bytes:</strong> {{ packet['dbytes'] }}</p>
+          </div>
+          <div class="row">
+            <p><strong>Source TTL:</strong> {{ packet['sttl'] }}</p>
+            <p><strong>Destination TTL:</strong> {{ packet['dttl'] }}</p>
+          </div>
+          {% if predictions %}
+            <div class="prediction {{ 'Attack' if predictions[loop.index0] == 'Attack Packet' else 'Normal' }}">
+              {{ predictions[loop.index0] }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+  <script>
+    function updateFilename() {
+      var input = document.getElementById('file');
+      var filenameLabel = document.getElementById('filename');
+      if(input.files.length > 0) {
+        filenameLabel.innerText = 'Selected File: ' + input.files[0].name;
+      } else {
+        filenameLabel.innerText = '';
+      }
+    }
+  </script>
+</body>
+</html>
